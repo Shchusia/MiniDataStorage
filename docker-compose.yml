@@ -1,0 +1,55 @@
+version: '3.7'
+services:
+  nginx:
+    image: nginx:1.17
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 0.0.0.0:8080:8080
+    depends_on:
+      - backend
+      - frontend
+  redis:
+    image: redis:latest
+    expose:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+    restart: always
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-dbname}
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    restart: always
+  backend:
+    build:
+      context: back
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - backend-storage-volume:/back/storage/
+    environment:
+      DATABASE_URL: 'postgresql://${DB_USER:-user}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-dbname}'
+    depends_on:
+      - "postgres"
+  frontend:
+    build:
+      context: front
+      dockerfile: Dockerfile
+    tty: true
+    environment:
+      - REACT_APP_MODE=production
+      - REACT_APP_BACKEND_PORT=8001 
+    depends_on:
+      - "backend"
+volumes:
+  postgres-db-volume:
+  backend-storage-volume:
