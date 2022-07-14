@@ -26,8 +26,8 @@ router = APIRouter()
     response_model=RespModel[ListAdminsModel],
 )
 def get_admins_route(
-    db: Session = Depends(get_db),
-    authorize: AuthJWT = Depends(),
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
     admin_id = int(authorize.get_jwt_subject())
@@ -43,9 +43,9 @@ def get_admins_route(
     response_model=RespModel[AdminModel],
 )
 def new_admin_route(
-    new_admin: AdminCreateEdit = Body(),
-    db: Session = Depends(get_db),
-    authorize: AuthJWT = Depends(),
+        new_admin: AdminCreateEdit = Body(),
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
     email = validate_user_email(new_admin.email.lower())
@@ -69,9 +69,9 @@ def new_admin_route(
     response_model=RespModel[AdminModel],
 )
 def delete_admin_route(
-    admin_id,
-    db: Session = Depends(get_db),
-    authorize: AuthJWT = Depends(),
+        admin_id,
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
     admin = get_admin_by_id_db(db, admin_id)
@@ -86,9 +86,9 @@ def delete_admin_route(
     response_model=RespModel[AdminModel],
 )
 def restore_admin_route(
-    admin_id,
-    db: Session = Depends(get_db),
-    authorize: AuthJWT = Depends(),
+        admin_id,
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
     admin = get_admin_by_id_db(db, admin_id)
@@ -97,18 +97,9 @@ def restore_admin_route(
     return get_response(data=convert_db_admin_to_model(admin))
 
 
-@router.put(
-    "/{admin_id}",
-    summary="EditChosenAdmin",
-    response_model=RespModel[AdminModel],
-)
-def edit_admin_route(
-    admin_id: int,
-    new_admin: AdminCreateEdit = Body(),
-    db: Session = Depends(get_db),
-    authorize: AuthJWT = Depends(),
-):
-    authorize.jwt_required()
+def edit_admin(admin_id: int,
+               new_admin: AdminCreateEdit,
+               db: Session) -> AdminModel:
     admin_db_to_update: AdminDB
     if new_admin.email:
         email = validate_user_email(new_admin.email.lower())
@@ -131,4 +122,35 @@ def edit_admin_route(
         admin_db_to_update.admin_password = get_password_hash(new_admin.password)
     db.commit()
 
-    return get_response(data=convert_db_admin_to_model(admin_db_to_update))
+    return convert_db_admin_to_model(admin_db_to_update)
+
+
+@router.put(
+    "/{admin_id}",
+    summary="EditChosenAdmin",
+    response_model=RespModel[AdminModel],
+)
+def edit_admin_route(
+        admin_id: int,
+        new_admin: AdminCreateEdit = Body(),
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
+):
+    authorize.jwt_required()
+
+    return get_response(data=edit_admin(admin_id, new_admin, db))
+
+
+@router.put(
+    "/",
+    summary="EditSelfAdmin",
+    response_model=RespModel[AdminModel],
+)
+def edit_self_admin_route(
+        new_admin: AdminCreateEdit = Body(),
+        db: Session = Depends(get_db),
+        authorize: AuthJWT = Depends(),
+):
+    authorize.jwt_required()
+    admin_id = authorize.get_jwt_subject()
+    return get_response(data=edit_admin(admin_id, new_admin, db))

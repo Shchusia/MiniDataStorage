@@ -22,7 +22,6 @@ def authenticate_admin(
     """
 
     admin = get_admin_by_email_db(db, user_email)  # type: AdminDB
-    print(admin)
     if not admin:
         return None
     if not verify_password(user_password, admin.admin_password):
