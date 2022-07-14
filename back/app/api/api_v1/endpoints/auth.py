@@ -22,13 +22,13 @@ router = APIRouter()
     summary="Login to account",
     description="method for user authorization ",
     response_description="does not return anything but puts an"
-    " access token and a refresh token in the cookie",
+                         " access token and a refresh token in the cookie",
     response_model=RespModel[SuccessExecutionWithoutResponseData],
 )
 def login_route(
-    user_data: AdminAuth = Body(),
-    db: AsyncSession = Depends(get_db),
-    authorize: AuthJWT = Depends(),
+        user_data: AdminAuth = Body(),
+        db: AsyncSession = Depends(get_db),
+        authorize: AuthJWT = Depends(),
 ):
     email = validate_user_email(user_data.email.lower())
     if not email:
@@ -43,6 +43,14 @@ def login_route(
         raise RequestException(
             ErrorModel(
                 code=403, title="Bad Request", detail="Incorrect email or password"
+            )
+        )
+    if user_db.is_deleted:
+        raise RequestException(
+            ErrorModel(
+                code=403, title="Access Denied",
+                detail="Your account has been blocked. "
+                       "Contact the administrator"
             )
         )
     access_token = authorize.create_access_token(subject=user_db.admin_id)
@@ -62,7 +70,7 @@ def login_route(
     summary="Refresh pair tokens",
     description="updates a pair of tokens received from the user",
     response_description="does not return anything but puts an access"
-    " token and a refresh token in the cookie",
+                         " token and a refresh token in the cookie",
     response_model=RespModel[SuccessExecutionWithoutResponseData],
 )
 def refresh_route(authorize: AuthJWT = Depends()):
