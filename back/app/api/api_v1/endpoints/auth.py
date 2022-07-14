@@ -60,8 +60,8 @@ def login_route(
         data=SuccessExecutionWithoutResponseData(msg="Successfully login"),
         headers={"AT": access_token, "RT": refresh_token},
     )
-    # authorize.set_access_cookies(access_token, response=response)
-    # authorize.set_refresh_cookies(refresh_token, response=response)
+    authorize.set_access_cookies(access_token, response=response)
+    authorize.set_refresh_cookies(refresh_token, response=response)
     return response
 
 
@@ -82,8 +82,8 @@ def refresh_route(authorize: AuthJWT = Depends()):
         data=SuccessExecutionWithoutResponseData(msg="The token has been refresh"),
         headers={"AT": access_token, "RT": refresh_token},
     )
-    # authorize.set_access_cookies(access_token, response=response)
-    # authorize.set_refresh_cookies(refresh_token, response=response)
+    authorize.set_access_cookies(access_token, response=response)
+    authorize.set_refresh_cookies(refresh_token, response=response)
     return response
 
 
@@ -98,6 +98,6 @@ def logout_route(authorize: AuthJWT = Depends()):
     response = get_response(
         data=SuccessExecutionWithoutResponseData(msg="Successfully logout")
     )
-    # authorize.unset_jwt_cookies(response)
-
+    authorize.unset_jwt_cookies(response)
+    #
     return response
