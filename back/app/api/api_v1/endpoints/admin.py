@@ -2,14 +2,19 @@ from fastapi import APIRouter, Body, Depends
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.orm import Session
 
-from app.db import get_db
+from app.core.exc import RequestException
+from app.core.security import get_password_hash
+from app.core.validators import validate_user_email
+from app.db import AdminDB, get_db
 from app.db.crud.crud_admin import (
     convert_db_admin_to_model,
-    get_admin_by_id,
+    create_admin_db,
+    get_admin_by_email_db,
+    get_admin_by_id_db,
     get_list_admins_db,
 )
 from app.models.admin import AdminCreateEdit, AdminModel, ListAdminsModel
-from app.models.general_response import RespModel, get_response
+from app.models.general_response import ErrorModel, RespModel, get_response
 
 router = APIRouter()
 
@@ -42,7 +47,20 @@ def new_admin_route(
     db: Session = Depends(get_db),
     authorize: AuthJWT = Depends(),
 ):
-    pass
+    authorize.jwt_required()
+    email = validate_user_email(new_admin.email.lower())
+    if not email:
+        raise RequestException(
+            ErrorModel(code=400, title="Bad Request", detail="Invalid email")
+        )
+
+    db_admin = get_admin_by_email_db(db=db, email=new_admin.email)
+    if db_admin:
+        raise RequestException(
+            ErrorModel(code=409, title="Bad Request", detail="Email not unique")
+        )
+    admin_model = create_admin_db(db, new_admin)
+    return get_response(data=admin_model)
 
 
 @router.delete(
@@ -56,7 +74,7 @@ def delete_admin_route(
     authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
-    admin = get_admin_by_id(db, admin_id)
+    admin = get_admin_by_id_db(db, admin_id)
     admin.is_deleted = True
     db.commit()
     return get_response(data=convert_db_admin_to_model(admin))
@@ -73,7 +91,7 @@ def restore_admin_route(
     authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
-    admin = get_admin_by_id(db, admin_id)
+    admin = get_admin_by_id_db(db, admin_id)
     admin.is_deleted = False
     db.commit()
     return get_response(data=convert_db_admin_to_model(admin))
@@ -85,9 +103,32 @@ def restore_admin_route(
     response_model=RespModel[AdminModel],
 )
 def edit_admin_route(
-    admin_id,
+    admin_id: int,
     new_admin: AdminCreateEdit = Body(),
     db: Session = Depends(get_db),
     authorize: AuthJWT = Depends(),
 ):
-    pass
+    authorize.jwt_required()
+    admin_db_to_update: AdminDB
+    if new_admin.email:
+        email = validate_user_email(new_admin.email.lower())
+        if not email:
+            raise RequestException(
+                ErrorModel(code=400, title="Bad Request", detail="Invalid email")
+            )
+
+        db_admin = get_admin_by_email_db(db=db, email=new_admin.email)
+        if db_admin and db_admin.admin_id != admin_id:
+            raise RequestException(
+                ErrorModel(code=409, title="Bad Request", detail="Email not unique")
+            )
+        admin_db_to_update = db_admin
+    else:
+        admin_db_to_update = get_admin_by_id_db(db, admin_id)
+
+    admin_db_to_update.admin_name = new_admin.name
+    if new_admin.password:
+        admin_db_to_update.admin_password = get_password_hash(new_admin.password)
+    db.commit()
+
+    return get_response(data=convert_db_admin_to_model(admin_db_to_update))
