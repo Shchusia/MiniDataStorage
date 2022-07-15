@@ -12,6 +12,12 @@ export const actionTypes = {
     restoreProject: "projects/restoreProject",
     //tokens
     createToken: "tokens/createToken",
-    deleteToken: "tokens/deleteToken"
-
+    deleteToken: "tokens/deleteToken",
+    //admins
+    createAdmin: "admins/createAdmin",
+    getAdmins: "admins/getAdmins",
+    deleteAdmin: "admins/deleteAdmin",
+    restoreAdmin: "admins/restoreAdmin",
+    editAdmins: "admins/editAdmins",
+    editSettingsAdmin: "admins/editSettingsAdmin",
 }

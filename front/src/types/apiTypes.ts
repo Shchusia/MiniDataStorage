@@ -68,6 +68,19 @@ export interface FullProject {
 }
 
 export interface TinyProjects {
-    [key: number]:  TinyProject
+    [key: number]: TinyProject
+}
+
+export interface AdminData {
+    adminId: number,
+    adminName: string,
+    adminEmail: string,
+    isDeleted: boolean
+}
+
+export interface EditCreateAdminData {
+    email: string,
+    password?: string,
+    name: string
 }
 

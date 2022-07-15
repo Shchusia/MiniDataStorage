@@ -120,6 +120,7 @@ const TableTokens = (props: TableTokensProps) => {
                             </TableRow>
                         )}
                     </TableBody>
+                    { props.tokens.length > 5 ? (
                     <TableFooter>
                         <TableRow>
                             <TablePagination
@@ -139,7 +140,7 @@ const TableTokens = (props: TableTokensProps) => {
                                 ActionsComponent={TablePaginationActions}
                             />
                         </TableRow>
-                    </TableFooter>
+                    </TableFooter>) : (<></>)}
                 </Table>
             </TableContainer>
         </React.Fragment>

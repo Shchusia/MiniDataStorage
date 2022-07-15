@@ -226,7 +226,7 @@ const TableProjects = () => {
     };
     return (
         <TableContainer component={Paper}>
-            <Table sx={{minWidth: 500}} aria-label="custom pagination table">
+            <Table  aria-label="custom pagination table">
                 <TableHead>
                     <TableRow>
                         <StyledTableCell></StyledTableCell>
@@ -248,6 +248,7 @@ const TableProjects = () => {
                         </TableRow>
                     )}
                 </TableBody>
+                {listProjects.length > 5 ?  (
                 <TableFooter>
                     <TableRow>
                         <TablePagination
@@ -267,7 +268,7 @@ const TableProjects = () => {
                             ActionsComponent={TablePaginationActions}
                         />
                     </TableRow>
-                </TableFooter>
+                </TableFooter>) : (<></>)}
             </Table>
         </TableContainer>
     )

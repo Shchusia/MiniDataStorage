@@ -26,7 +26,8 @@ export const login = createAsyncThunk(actionTypes.login, async (requestData: Bas
         detail: "",
         title: "",
         at: "",
-        rt: ""
+        rt: "",
+        admin: {}
     }
     if (response.status !== 200) {
         result.status = StatusExecutionRequest.REJECT
@@ -34,15 +35,16 @@ export const login = createAsyncThunk(actionTypes.login, async (requestData: Bas
         result.detail = apiResult.data.detail
         result.title = apiResult.data.title
     } else {
+        const apiResult = await response.json()
+
         result.status = StatusExecutionRequest.SUCCESS
         result.at = response.headers.get('AT') as string
         result.at = response.headers.get('at') as string
         // result.rt = response.headers.get('RT') as string
         result.rt = response.headers.get('rt') as string
         result.isAuth = true
+        result.admin = apiResult.data
     }
-    console.log(response.headers)
-    console.log(result)
     return result
 
 })

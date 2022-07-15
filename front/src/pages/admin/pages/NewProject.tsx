@@ -32,7 +32,7 @@ const NewProject = () => {
         if (!dataRequest.projectManagerEmail.match(emailRegexCompiled)) {
             dispatcher(addAlert({
                 type: TypeAlert.WARNING,
-                text: "Input Correct email",
+                text: "Input incorrect email",
                 title: "Input error",
                 ttl: 5
             }))

@@ -1,24 +1,36 @@
-import {AlertType, ReduceProjects, ReducerAlerts, ReducerAuth, ReducerState} from "../../types/typeStores";
+import {
+    AlertType,
+    ReduceAdmins,
+    ReduceProjects,
+    ReducerAlerts,
+    ReducerAuth,
+    ReducerState
+} from "../../types/typeStores";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "../index";
 import {StatusExecutionRequest, TypeAlert} from "../../types/typesSystem";
 import {login, logout, refresh} from "../middlewares/auth";
-import {FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
+import {AdminData, FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
 import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
 import {createToken, deleteToken} from "../middlewares/tokens";
+import {editSelfAdmin, getListAdmins} from "../middlewares/admins";
 
 
 const initialState: (ReducerAuth
     & ReducerAlerts
     & ReducerState
-    & ReduceProjects) = {
+    & ReduceProjects
+    & ReduceAdmins
+    ) = {
     alerts: [],
     isAuth: null,
     accessToken: localStorage.getItem("accessToken"),
     refreshToken: localStorage.getItem("refreshToken"),
     state: StatusExecutionRequest.EMPTY,
     projects: {},
-    detailProject: {}
+    detailProject: {},
+    admins: [],
+    currentAdmin: null
 }
 
 const convertListTinyProjects = (projects: TinyProject[]) => {
@@ -50,6 +62,8 @@ export const globalSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                     if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                         state.isAuth = action.payload.isAuth
+                        // @ts-ignore
+                        state.currentAdmin = action.payload.admin
                         state.accessToken = action.payload.at
                         state.refreshToken = action.payload.rt
                         localStorage.setItem("accessToken", action.payload.at)
@@ -101,7 +115,7 @@ export const globalSlice = createSlice({
                     state.isAuth = false
                 }
                 localStorage.setItem("accessToken", '')
-                    localStorage.setItem("refreshToken", '')
+                localStorage.setItem("refreshToken", '')
             })
             .addCase(login.rejected, (state, action) => {
                 state.state = StatusExecutionRequest.REJECT
@@ -366,6 +380,40 @@ export const globalSlice = createSlice({
                 }
 
             })
+            .addCase(getListAdmins.fulfilled, (state, action) => {
+                state.state = StatusExecutionRequest.SUCCESS
+                if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    state.admins = action.payload.admins
+                } else {
+                    const alert = {
+                        type: TypeAlert.ERROR,
+                        text: action.payload.detail,
+                        title: action.payload.title,
+                        ttl: 10
+                    }
+                    const tmpAlert = [...state.alerts]
+                    tmpAlert.push(alert)
+                    state.alerts = tmpAlert
+                }
+            }).addCase(editSelfAdmin.fulfilled, (state, action) => {
+                if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    // @ts-ignore
+                    state.currentAdmin = action.payload.admin
+                } else {
+                    //@ts-ignore
+                    const alert = {
+                        type: TypeAlert.ERROR,
+                        text: action.payload.detail,
+                        title: action.payload.title,
+                        ttl: 10
+                    }
+                    const tmpAlert = [...state.alerts]
+                    tmpAlert.push(alert)
+                    state.alerts = tmpAlert
+
+                }
+            }
+        )
     }
 
 
@@ -380,3 +428,5 @@ export const getAccessToken = (state: RootState): string | undefined | null => s
 export const getRefreshToken = (state: RootState): string | undefined | null => state.globalReducer.refreshToken;
 export const getProjects = (state: RootState): TinyProjects => state.globalReducer.projects;
 export const getFullProject = (idProject: number) => (state: RootState): FullProject | undefined | null => state.globalReducer.detailProject[idProject]
+export const getAdmins = (state: RootState): AdminData[] => state.globalReducer.admins;
+export const getCurrentAdmin = (state: RootState): AdminData | null => state.globalReducer.currentAdmin;

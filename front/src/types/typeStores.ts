@@ -1,5 +1,5 @@
 import {StatusExecutionRequest, TypeAlert} from "./typesSystem";
-import {FullProject, TinyProject, TinyProjects} from "./apiTypes";
+import {AdminData, FullProject, TinyProject, TinyProjects} from "./apiTypes";
 
 export interface ReducerAuth {
     isAuth: boolean | null
@@ -28,4 +28,8 @@ export interface ReduceProjects {
     detailProject: {
         [key: number]: FullProject|null
     }
+}
+export interface ReduceAdmins {
+    admins: AdminData[]
+    currentAdmin: AdminData | null
 }
