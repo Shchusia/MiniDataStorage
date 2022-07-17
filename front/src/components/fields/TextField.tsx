@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {useTranslation} from "react-i18next";
 import TextField from "@mui/material/TextField";
-import {isDisabled} from "@testing-library/user-event/dist/utils";
 
 
 export interface InterfaceTextField {
@@ -16,14 +15,15 @@ export interface InterfaceTextField {
     required?: boolean
     fullWidth?: boolean
     value?: string
-    isDisabled?:boolean
+    isDisabled?: boolean
+    minLength?: number
 }
 
 const TextFieldCustom = (props: InterfaceTextField) => {
     const [t,] = useTranslation('translation');
     const [t_error,] = useTranslation('errors',);
     const [errorText, setError] = useState<string>('')
-    const [value, setValue] = useState<string>(props.value === undefined ? '': props.value)
+    const [value, setValue] = useState<string>(props.value === undefined ? '' : props.value)
 
 
     const resetError = () => {
@@ -45,8 +45,8 @@ const TextFieldCustom = (props: InterfaceTextField) => {
             setError("")
         }
     }
-    const changeValue = (e:any) => {
-        setValue(e.target.value )
+    const changeValue = (e: any) => {
+        setValue(e.target.value)
     }
     return <TextField
         margin="normal"
@@ -66,6 +66,9 @@ const TextFieldCustom = (props: InterfaceTextField) => {
         value={value}
         disabled={props?.isDisabled}
         onChange={changeValue}
+        inputProps={{
+            minLength: props?.minLength
+        }}
 
     />
 }

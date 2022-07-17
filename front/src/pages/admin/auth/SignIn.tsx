@@ -62,11 +62,10 @@ const SignIn = () => {
                      sx={{mt: 1, width: 1}}>
                     <EmailField/>
                     <PasswordField titleField={"password"} label={t("Password")}/>
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary"/>}
-                        /* @ts-ignore */
-                        label={t("Remember me")}
-                    />
+                    {/*<FormControlLabel*/}
+                    {/*    control={<Checkbox value="remember" color="primary"/>}*/}
+                    {/*    label={t("Remember me")}*/}
+                    {/*/>*/}
                     <Button
                         type="submit"
                         fullWidth
@@ -76,13 +75,13 @@ const SignIn = () => {
                         {t("Sign In")}
                     </Button>
                     <Grid container spacing={10}>
-                        <Grid item xs>
-                            <Link href="#" variant="body2" onClick={() => {
-                                // navigator(routes.restore_password)
-                            }}>
-                                {t("Forgot password?")}
-                            </Link>
-                        </Grid>
+                        {/*<Grid item xs>*/}
+                        {/*    <Link href="#" variant="body2" onClick={() => {*/}
+                        {/*        // navigator(routes.restore_password)*/}
+                        {/*    }}>*/}
+                        {/*        {t("Forgot password?")}*/}
+                        {/*    </Link>*/}
+                        {/*</Grid>*/}
                         {/*<Grid item>*/}
                         {/*    <Link href="#" variant="body2" onClick={() => {*/}
                         {/*        navigator(routes.sign_up)*/}

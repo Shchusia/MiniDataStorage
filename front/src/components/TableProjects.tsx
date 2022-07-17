@@ -1,6 +1,6 @@
 import React from 'react'
 import {useDispatch, useSelector} from "react-redux";
-import {getAccessToken, getProjects} from "../store/reducers/globalReducer";
+import {getAccessToken, getProjects, getRefreshToken} from "../store/reducers/globalReducer";
 import {useNavigate} from "react-router";
 import {styled, useTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -28,8 +28,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import {routes} from "../configs/routes";
 import Tokens from "./Tokens";
-import {deleteProject, restoreProject} from "../store/middlewares/projects";
 import {getHeaders} from "../utils/utils";
+import {deleteProject, restoreProject} from "../store/apiFunctions/projectMiddleware";
 
 interface TablePaginationActionsProps {
     count: number;
@@ -146,15 +146,30 @@ const TableRowSuperCustom = (row: TinyProject) => {
     const [open, setOpen] = React.useState(false);
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
     const clickDeleteRestore = () => {
         if (row.isDeleted) {
-            dispatcher(restoreProject({headers: getHeaders(at as string), optional: {projectId: row.projectId}}))
+
+            dispatcher(restoreProject({
+                    data: {
+                        headers: getHeaders(at as string),
+                        optional: {projectId: row.projectId}
+                    },
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                }
+            ))
         } else {
             dispatcher(deleteProject({
-                headers: getHeaders(at as string),
-                optional: {projectId: row.projectId}
-            }))
+                    data: {
+                        headers: getHeaders(at as string),
+                        optional: {projectId: row.projectId}
+                    },
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                }
+            ))
         }
     }
 
@@ -226,11 +241,11 @@ const TableProjects = () => {
     };
     return (
         <TableContainer component={Paper}>
-            <Table sx={{minWidth: 500}} aria-label="custom pagination table">
+            <Table aria-label="custom pagination table">
                 <TableHead>
                     <TableRow>
                         <StyledTableCell></StyledTableCell>
-                        <StyledTableCell align="left">{t( "Title Project")}</StyledTableCell>
+                        <StyledTableCell align="left">{t("Title Project")}</StyledTableCell>
                         <StyledTableCell align="right">{t("Project Manager")}</StyledTableCell>
                         <StyledTableCell align="right">{t("Actions")}</StyledTableCell>
                     </TableRow>
@@ -248,26 +263,27 @@ const TableProjects = () => {
                         </TableRow>
                     )}
                 </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TablePagination
-                            rowsPerPageOptions={[5, 10, 25, {label: t('All'), value: -1}]}
-                            colSpan={4}
-                            count={listProjects.length}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            SelectProps={{
-                                inputProps: {
-                                    'aria-label': t('rows per page'),
-                                },
-                                native: true,
-                            }}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            ActionsComponent={TablePaginationActions}
-                        />
-                    </TableRow>
-                </TableFooter>
+                {listProjects.length > 5 ? (
+                    <TableFooter>
+                        <TableRow>
+                            <TablePagination
+                                rowsPerPageOptions={[5, 10, 25, {label: t('All'), value: -1}]}
+                                colSpan={4}
+                                count={listProjects.length}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                SelectProps={{
+                                    inputProps: {
+                                        'aria-label': t('rows per page'),
+                                    },
+                                    native: true,
+                                }}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                ActionsComponent={TablePaginationActions}
+                            />
+                        </TableRow>
+                    </TableFooter>) : (<></>)}
             </Table>
         </TableContainer>
     )

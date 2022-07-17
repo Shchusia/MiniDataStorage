@@ -8,16 +8,18 @@ import TextFieldCustom from "../../../components/fields/TextField";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from '@mui/material/Container';
-import {addAlert, getAccessToken} from "../../../store/reducers/globalReducer";
+import {addAlert, getAccessToken, getRefreshToken} from "../../../store/reducers/globalReducer";
 import {TypeAlert} from "../../../types/typesSystem";
 import {getHeaders} from "../../../utils/utils";
-import {createProject} from "../../../store/middlewares/projects";
+import {createProject} from "../../../store/apiFunctions/projectMiddleware";
+// import {createProject} from "../../../store/middlewares/projects";
 
 
 const NewProject = () => {
     const [t] = useTranslation('translation');
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -32,7 +34,7 @@ const NewProject = () => {
         if (!dataRequest.projectManagerEmail.match(emailRegexCompiled)) {
             dispatcher(addAlert({
                 type: TypeAlert.WARNING,
-                text: "Input Correct email",
+                text: "Input incorrect email",
                 title: "Input error",
                 ttl: 5
             }))
@@ -41,9 +43,14 @@ const NewProject = () => {
 
             // send request
             dispatcher(
-                createProject(
-                    {data: dataRequest,
-                        headers: getHeaders(at as string)})
+                createProject({
+                    data: {
+                        data: dataRequest,
+                        headers: getHeaders(at as string)
+                    },
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                })
             )
         }
     }

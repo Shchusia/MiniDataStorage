@@ -32,7 +32,10 @@ def convert_db_admin_to_model(db_admin: AdminDB) -> AdminModel:
 
 def get_list_admins_db(db: Session, admin_id_to_ignore: int) -> List[AdminModel]:
     admins = (
-        db.query(AdminDB).filter(AdminDB.admin_id != admin_id_to_ignore).all()
+        db.query(AdminDB)
+        .filter(AdminDB.admin_id != admin_id_to_ignore)
+        .order_by(AdminDB.is_deleted.asc(), AdminDB.admin_id.desc())
+        .all()
     )  # type: List[AdminDB]
     return [convert_db_admin_to_model(admin) for admin in admins]
 

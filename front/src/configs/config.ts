@@ -7,8 +7,7 @@ export enum EnumEnvs {
 
 const back_port = process.env.REACT_APP_BACKEND_PORT || "8001"
 const host = window.location.protocol + "//" + window.location.host;
-console.log(host)
-console.log(back_port)
+export const defaultEmailAdmin = 'admin@admin.admin'
 
 export interface Config {
     api: {
@@ -26,11 +25,12 @@ const dev: Config = {
         baseRoutStatic: "/static",
         baseRout: "/api/mdt",
         // baseHost: `http://back:${back_port}`,
-        baseHost: window.location.protocol + "//" + window.location.host,
-        // baseHost: 'http://localhost:8000'
+        // baseHost: window.location.protocol + "//" + window.location.host,
+        baseHost: 'http://localhost:8000'
     },
     global: {
-        isDebug: false,
+        // isDebug: false,
+        isDebug: true,
     }
 }
 

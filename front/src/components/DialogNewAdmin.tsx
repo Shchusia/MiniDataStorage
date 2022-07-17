@@ -4,19 +4,18 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import {useTranslation} from "react-i18next";
 import Dialog from '@mui/material/Dialog';
 import {Box, DialogActions, DialogContent, DialogTitle} from "@mui/material";
-import TextField from "@mui/material/TextField";
 import {useDispatch, useSelector} from "react-redux";
-import {getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
+import {addAlert, getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
+import EmailField from "./fields/EmailField";
+import TextFieldCustom from "./fields/TextField";
+import {EditCreateAdminData} from "../types/apiTypes";
+import {TypeAlert} from "../types/typesSystem";
+import {sha256} from "js-sha256";
 import {getHeaders} from "../utils/utils";
-import {createToken} from "../store/apiFunctions/tokenMiddleware";
+import {createAdmin} from "../store/apiFunctions/adminMiddleware";
 
 
-export interface PropsDialogNewToken {
-    projectId: number,
-    isWrite?: boolean
-}
-
-const DialogNewToken = (props: PropsDialogNewToken) => {
+const DialogNewAdmin = () => {
     const [t,] = useTranslation('translation');
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
@@ -33,16 +32,32 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
     const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const dataRequest = {
-            "projectId": props.projectId,
-            "expired": data.get("DatetimeExpired"),
-            "isWrite": props?.isWrite ? true : false
+        let isError = false;
+        const dataRequest: EditCreateAdminData = {
+            email: data.get("email") as string,
+            name: data.get("adminName") as string,
         }
-        dispatcher(createToken({data:{data: dataRequest,
-            headers: getHeaders(at as string)},
-            accessToken: at as string,
-            refreshToken: rt as string
-        }))
+        if (data.get("passwordFirst") !== data.get("passwordSecond")) {
+            dispatcher(addAlert({
+                type: TypeAlert.WARNING,
+                text: "Passwords do not match",
+                title: "Input error",
+                ttl: 5
+            }))
+            isError = true;
+        } else {
+            dataRequest.password = sha256(data.get("passwordFirst") as string)
+        }
+        if (!isError) {
+            dispatcher(createAdmin({
+                data: {data: dataRequest, headers: getHeaders(at as string)},
+                accessToken: at as string,
+                refreshToken: rt as string
+            }))
+            handleClose()
+
+        }
+
     }
 
     return <React.Fragment>
@@ -52,7 +67,7 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
             onClick={handleClickOpen}
             startIcon={<AddCircleOutlineIcon/>}
         >
-            {t("New")}
+            {t("Add")}
         </Button>
         <Dialog
             open={open}
@@ -61,22 +76,17 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
         >
             <Box component="form" onSubmit={submitHandler}>
                 <DialogTitle>
-                    {t(`${props.isWrite ? "New Write Token" : "New Read Token"}`)}
+                    {t("New admin")}
                 </DialogTitle>
 
                 <DialogContent>
                     <br/>
-                    <TextField
-                        id="DatetimeExpired"
-                        name="DatetimeExpired"
-                        label={t("Expired DateTime")}
-                        type="datetime-local"
-                        // defaultValue="2017-05-24T10:30"
-                        sx={{width: 250}}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                    />
+                    <EmailField/>
+                    <TextFieldCustom id={"passwordFirst"} label={"Password"} fullWidth required minLength={5}/>
+                    <TextFieldCustom id={"passwordSecond"} label={"Reenter password"} required fullWidth minLength={5}/>
+                    <TextFieldCustom id={"adminName"} label={"Name"} fullWidth required/>
+
+
                 </DialogContent>
                 <DialogActions>
                     <Button id="cancelDialog" onClick={handleClose}>{t("Cancel")}</Button>
@@ -90,4 +100,4 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
 
 }
 
-export default DialogNewToken
+export default DialogNewAdmin
