@@ -46,7 +46,7 @@ export const editSelfAdmin = createAsyncThunk(actionTypes.editSettingsAdmin, asy
 export const getListAdmins = createAsyncThunk(actionTypes.getAdmins, async (data: BaseRequest
 ) => {
     if (config.global.isDebug) {
-        console.log(`Api getProjects:\n
+        console.log(`Api getListAdmins:\n
         Url: ${JSON.stringify(apiRouts.getAdmins)}\n`)
     }
     const response = await fetch(apiRouts.getAdmins.api,
@@ -74,3 +74,112 @@ export const getListAdmins = createAsyncThunk(actionTypes.getAdmins, async (data
     }
     return result
 })
+
+
+export const createAdmin = createAsyncThunk(actionTypes.createAdmin, async (data: BaseRequest) => {
+    if (config.global.isDebug) {
+        console.log(`Api createAdmins:\n
+        Url: ${JSON.stringify(apiRouts.createAdmin)}\n
+        Data: ${JSON.stringify(data)}`)
+    }
+    const response = await fetch(apiRouts.createAdmin.api,
+        {
+            method: apiRouts.createAdmin.method.toUpperCase(),
+            body: JSON.stringify({...data.data}),
+            headers: {
+                ...data.headers,
+                "Content-type": "application/json"
+
+            }
+        })
+    const result = {
+        status: StatusExecutionRequest.PENDING,
+        detail: "",
+        title: "",
+        admin: {}
+    }
+    if (response.status !== 200) {
+        result.status = StatusExecutionRequest.REJECT
+        const apiResult: BadRequest = await response.json()
+        result.detail = apiResult.data.detail
+        result.title = apiResult.data.title
+    } else {
+        const apiResult = await response.json()
+        result.status = StatusExecutionRequest.SUCCESS
+        result.admin = apiResult.data
+    }
+    return result
+})
+
+export const deleteAdmin = createAsyncThunk(actionTypes.deleteAdmin, async (data: BaseRequest) => {
+    if (config.global.isDebug) {
+        console.log(`Api deleteAdmins:\n
+        Url: ${JSON.stringify(apiRouts.deleteAdmin)}\n
+        Data: ${JSON.stringify(data)}`)
+    }
+    //@ts-ignore
+    const response = await fetch(apiRouts.deleteAdmin.api + (data.optional.adminId as string ),
+        {
+            method: apiRouts.deleteAdmin.method.toUpperCase(),
+            // body: JSON.stringify({...data.data}),
+            headers: {
+                ...data.headers,
+                "Content-type": "application/json"
+
+            }
+        })
+    const result = {
+        status: StatusExecutionRequest.PENDING,
+        detail: "",
+        title: "",
+        admin: {}
+    }
+    if (response.status !== 200) {
+        result.status = StatusExecutionRequest.REJECT
+        const apiResult: BadRequest = await response.json()
+        result.detail = apiResult.data.detail
+        result.title = apiResult.data.title
+    } else {
+        const apiResult = await response.json()
+        result.status = StatusExecutionRequest.SUCCESS
+        result.admin = apiResult.data
+    }
+    return result
+})
+export const restoreAdmin = createAsyncThunk(actionTypes.restoreAdmin, async (data: BaseRequest) => {
+    if (config.global.isDebug) {
+        console.log(`Api deleteAdmins:\n
+        Url: ${JSON.stringify(apiRouts.restoreAdmin)}\n
+        Data: ${JSON.stringify(data)}`)
+    }
+    //@ts-ignore
+    const response = await fetch(apiRouts.restoreAdmin.api + (data.optional.adminId as string ),
+        {
+            method: apiRouts.restoreAdmin.method.toUpperCase(),
+            // body: JSON.stringify({...data.data}),
+            headers: {
+                ...data.headers,
+                "Content-type": "application/json"
+
+            }
+        })
+    const result = {
+        status: StatusExecutionRequest.PENDING,
+        detail: "",
+        title: "",
+        admin: {}
+    }
+    if (response.status !== 200) {
+        result.status = StatusExecutionRequest.REJECT
+        const apiResult: BadRequest = await response.json()
+        result.detail = apiResult.data.detail
+        result.title = apiResult.data.title
+    } else {
+        const apiResult = await response.json()
+        result.status = StatusExecutionRequest.SUCCESS
+        result.admin = apiResult.data
+    }
+    return result
+})
+
+

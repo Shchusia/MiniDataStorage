@@ -50,11 +50,8 @@ const Settings = () => {
         }
         if (!isError) {
             dispatcher(editSelfAdmin({data: dataRequest, headers: getHeaders(at as string)}))
-            // console.log(dataRequest)
         }
-
     }
-
     if (currentAdmin === null) {
         dispatcher(logout(
             {headers: getHeaders(at as string)}

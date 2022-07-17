@@ -13,7 +13,7 @@ import {login, logout, refresh} from "../middlewares/auth";
 import {AdminData, FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
 import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
 import {createToken, deleteToken} from "../middlewares/tokens";
-import {editSelfAdmin, getListAdmins} from "../middlewares/admins";
+import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../middlewares/admins";
 
 
 const initialState: (ReducerAuth
@@ -396,9 +396,30 @@ export const globalSlice = createSlice({
                     state.alerts = tmpAlert
                 }
             }).addCase(editSelfAdmin.fulfilled, (state, action) => {
+            if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                // @ts-ignore
+                state.currentAdmin = action.payload.admin
+            } else {
+                //@ts-ignore
+                const alert = {
+                    type: TypeAlert.ERROR,
+                    text: action.payload.detail,
+                    title: action.payload.title,
+                    ttl: 10
+                }
+                const tmpAlert = [...state.alerts]
+                tmpAlert.push(alert)
+                state.alerts = tmpAlert
+
+            }
+        })
+            .addCase(createAdmin.fulfilled, (state, action) => {
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    const tmpAdmins = [...state.admins]
                     // @ts-ignore
-                    state.currentAdmin = action.payload.admin
+                    tmpAdmins.push(action.payload.admin)
+
+                    state.admins = tmpAdmins
                 } else {
                     //@ts-ignore
                     const alert = {
@@ -412,12 +433,66 @@ export const globalSlice = createSlice({
                     state.alerts = tmpAlert
 
                 }
-            }
-        )
+            })
+            .addCase(deleteAdmin.fulfilled, (state, action) => {
+                if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    const tmpAdmins = [...state.admins]
+
+                    // @ts-ignore
+                    const adminToChange = searchId(tmpAdmins,action.payload.admin.adminId)
+                    console.log(adminToChange)
+                    // @ts-ignore
+                    tmpAdmins[adminToChange] = action.payload.admin
+                    state.admins = tmpAdmins
+                } else {
+                    //@ts-ignore
+                    const alert = {
+                        type: TypeAlert.ERROR,
+                        text: action.payload.detail,
+                        title: action.payload.title,
+                        ttl: 10
+                    }
+                    const tmpAlert = [...state.alerts]
+                    tmpAlert.push(alert)
+                    state.alerts = tmpAlert
+
+                }
+            })
+            .addCase(restoreAdmin.fulfilled, (state, action) => {
+                if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    const tmpAdmins = [...state.admins]
+
+                    // @ts-ignore
+                    const adminToChange = searchId(tmpAdmins,action.payload.admin.adminId)
+                    console.log(adminToChange)
+                    // @ts-ignore
+                    tmpAdmins[adminToChange] = action.payload.admin
+                    state.admins = tmpAdmins
+                } else {
+                    //@ts-ignore
+                    const alert = {
+                        type: TypeAlert.ERROR,
+                        text: action.payload.detail,
+                        title: action.payload.title,
+                        ttl: 10
+                    }
+                    const tmpAlert = [...state.alerts]
+                    tmpAlert.push(alert)
+                    state.alerts = tmpAlert
+
+                }
+            })
     }
-
-
 })
+
+const searchId = (listAdmins: AdminData[], adminIdToSearch: number ): number  => {
+    for (let index = 0; index < listAdmins.length; index++) {
+        if (listAdmins[index].adminId === adminIdToSearch) {
+            return  index
+        }
+    }
+    return -1
+}
 
 export default globalSlice.reducer
 export const {addAlert, setState} = globalSlice.actions

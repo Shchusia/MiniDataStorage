@@ -27,5 +27,13 @@
   "Expired DateTime": "Expired DateTime",
   "New Read Token":"New Read Token",
   "New Write Token": "New Write Token",
-  "Cancel": "Cancel"
+  "Cancel": "Cancel",
+  "Passwords do not match": "Passwords do not match",
+  "Warning": "Warning",
+  "DefaultEmailWarning": "You are using the default user. It is not safe\nChange email and/or password",
+  "Empty list admins": "Empty list admins",
+  "New admin": "New admin",
+  "List Admins": "List Admins",
+  "Admin Name": "Admin Name",
+  "Email": "Email"
 }
