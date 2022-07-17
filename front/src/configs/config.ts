@@ -25,8 +25,8 @@ const dev: Config = {
         baseRoutStatic: "/static",
         baseRout: "/api/mdt",
         // baseHost: `http://back:${back_port}`,
-        // baseHost: window.location.protocol + "//" + window.location.host,
-        baseHost: 'http://localhost:8000'
+        baseHost: window.location.protocol + "//" + window.location.host,
+        // baseHost: 'http://localhost:8000'
     },
     global: {
         // isDebug: false,
