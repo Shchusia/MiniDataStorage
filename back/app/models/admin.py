@@ -18,7 +18,7 @@ class AdminCreateEdit(BaseModel):
     """
 
     email: str = Field(description="Email user")
-    password: Optional[str] = Field(description="Password user")
+    password: Optional[str] = Field(None, description="Password user")
     name: str = Field()
 
 
