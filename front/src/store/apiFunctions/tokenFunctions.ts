@@ -20,7 +20,6 @@ export async function createTokenFunction(data: RequestBaseApi): Promise<Respons
             }
         }
     )
-    console.log(data)
     const result: ResponseBaseApi = {
         status: StatusExecutionRequest.SUCCESS,
         responseData: {
@@ -29,7 +28,6 @@ export async function createTokenFunction(data: RequestBaseApi): Promise<Respons
 
         }
     }
-    console.log(result)
     const apiResult = await response.json()
     if (response.status !== 200) {
 

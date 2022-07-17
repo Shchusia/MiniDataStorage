@@ -16,10 +16,9 @@ import TableCell from "@mui/material/TableCell";
 import {StyledTableCell, StyledTableRow, TablePaginationActions} from "./TableProjects";
 import Button from "@mui/material/Button";
 import {useDispatch, useSelector} from "react-redux";
-import {getAccessToken} from "../store/reducers/globalReducer";
+import {getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
 import {getHeaders} from "../utils/utils";
-import {deleteToken} from "../store/middlewares/tokens";
-import {deleteAdmin, restoreAdmin} from "../store/middlewares/admins";
+import {deleteAdmin, restoreAdmin} from "../store/apiFunctions/adminMiddleware";
 
 export interface TableadminsProps {
     admins: AdminData[]
@@ -34,6 +33,7 @@ const TableAdmins = (props: TableadminsProps) => {
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - props.admins.length) : 0;
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
 
     const handleChangePage = (
@@ -52,13 +52,20 @@ const TableAdmins = (props: TableadminsProps) => {
     const clickDeleteRestoreAdmin = (adminId: number, isDeleted: boolean) => {
         if (isDeleted) {
             dispatcher(restoreAdmin({
-                optional: {adminId: adminId},
-                headers: getHeaders(at as string)
+                data: {
+                    optional: {adminId: adminId},
+                    headers: getHeaders(at as string)
+                },
+                accessToken: at as string,
+                refreshToken: at as string,
             }))
         } else {
             dispatcher(deleteAdmin({
-                optional: {adminId: adminId},
-                headers: getHeaders(at as string)
+                data: {
+                    optional: {adminId: adminId},
+                    headers: getHeaders(at as string)
+                }, accessToken: at as string,
+                refreshToken: at as string,
             }))
         }
         // dispatcher(deleteToken({

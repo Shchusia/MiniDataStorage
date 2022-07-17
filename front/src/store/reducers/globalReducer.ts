@@ -13,7 +13,7 @@ import {login, logout, refresh} from "../middlewares/auth";
 import {AdminData, FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
 // import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
 // import {createToken, deleteToken} from "../middlewares/tokens";
-import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../middlewares/admins";
+// import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../middlewares/admins";
 import {
     createProject,
     deleteProject,
@@ -23,6 +23,7 @@ import {
     restoreProject
 } from "../apiFunctions/projectMiddleware";
 import {createToken, deleteToken} from "../apiFunctions/tokenMiddleware";
+import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../apiFunctions/adminMiddleware";
 
 
 const initialState: (ReducerAuth
@@ -410,12 +411,13 @@ export const globalSlice = createSlice({
             .addCase(getListAdmins.fulfilled, (state, action) => {
                 state.state = StatusExecutionRequest.SUCCESS
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
-                    state.admins = action.payload.admins
+                    //@ts-ignore
+                    state.admins = action.payload?.responseData?.admins
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -425,13 +427,13 @@ export const globalSlice = createSlice({
             }).addCase(editSelfAdmin.fulfilled, (state, action) => {
             if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                 // @ts-ignore
-                state.currentAdmin = action.payload.admin
+                state.currentAdmin = action.payload.responseData.admin
             } else {
                 //@ts-ignore
                 const alert = {
                     type: TypeAlert.ERROR,
-                    text: action.payload.detail,
-                    title: action.payload.title,
+                    text: action.payload?.error?.detail as string,
+                    title: action.payload?.error?.title as string,
                     ttl: 10
                 }
                 const tmpAlert = [...state.alerts]
@@ -444,15 +446,15 @@ export const globalSlice = createSlice({
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpAdmins = [...state.admins]
                     // @ts-ignore
-                    tmpAdmins.push(action.payload.admin)
+                    tmpAdmins.push(action.payload.responseData.admin)
 
                     state.admins = tmpAdmins
                 } else {
                     //@ts-ignore
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -466,17 +468,17 @@ export const globalSlice = createSlice({
                     const tmpAdmins = [...state.admins]
 
                     // @ts-ignore
-                    const adminToChange = searchId(tmpAdmins, action.payload.admin.adminId)
+                    const adminToChange = searchId(tmpAdmins, action.payload.responseData.admin.adminId)
                     console.log(adminToChange)
                     // @ts-ignore
-                    tmpAdmins[adminToChange] = action.payload.admin
+                    tmpAdmins[adminToChange] = action.payload.responseData.admin
                     state.admins = tmpAdmins
                 } else {
                     //@ts-ignore
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -490,23 +492,22 @@ export const globalSlice = createSlice({
                     const tmpAdmins = [...state.admins]
 
                     // @ts-ignore
-                    const adminToChange = searchId(tmpAdmins, action.payload.admin.adminId)
+                    const adminToChange = searchId(tmpAdmins, action.payload.responseData.admin.adminId)
                     console.log(adminToChange)
                     // @ts-ignore
-                    tmpAdmins[adminToChange] = action.payload.admin
+                    tmpAdmins[adminToChange] = action.payload.responseData.admin
                     state.admins = tmpAdmins
                 } else {
                     //@ts-ignore
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
                     tmpAlert.push(alert)
                     state.alerts = tmpAlert
-
                 }
             })
     }

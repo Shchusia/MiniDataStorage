@@ -5,7 +5,7 @@ import TextFieldCustom from "../../../components/fields/TextField";
 import EmailField from "../../../components/fields/EmailField";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import {addAlert, getAccessToken, getCurrentAdmin} from "../../../store/reducers/globalReducer";
+import {addAlert, getAccessToken, getCurrentAdmin, getRefreshToken} from "../../../store/reducers/globalReducer";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router";
 import {useTranslation} from "react-i18next";
@@ -15,7 +15,8 @@ import {getHeaders} from "../../../utils/utils";
 import {EditCreateAdminData} from "../../../types/apiTypes";
 import {TypeAlert} from "../../../types/typesSystem";
 import {sha256} from "js-sha256";
-import {editSelfAdmin} from "../../../store/middlewares/admins";
+import {editSelfAdmin} from "../../../store/apiFunctions/adminMiddleware";
+// import {editSelfAdmin} from "../../../store/middlewares/admins";
 
 
 const Settings = () => {
@@ -24,6 +25,7 @@ const Settings = () => {
     const navigator = useNavigate()
     const currentAdmin = useSelector(getCurrentAdmin)
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -49,7 +51,11 @@ const Settings = () => {
             }
         }
         if (!isError) {
-            dispatcher(editSelfAdmin({data: dataRequest, headers: getHeaders(at as string)}))
+            dispatcher(editSelfAdmin({
+                data: {data: dataRequest, headers: getHeaders(at as string)},
+                accessToken: at as string,
+                refreshToken: rt as string
+            }))
         }
     }
     if (currentAdmin === null) {

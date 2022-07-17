@@ -5,20 +5,21 @@ import {useTranslation} from "react-i18next";
 import Dialog from '@mui/material/Dialog';
 import {Box, DialogActions, DialogContent, DialogTitle} from "@mui/material";
 import {useDispatch, useSelector} from "react-redux";
-import {addAlert, getAccessToken} from "../store/reducers/globalReducer";
+import {addAlert, getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
 import EmailField from "./fields/EmailField";
 import TextFieldCustom from "./fields/TextField";
 import {EditCreateAdminData} from "../types/apiTypes";
 import {TypeAlert} from "../types/typesSystem";
 import {sha256} from "js-sha256";
-import {createAdmin, editSelfAdmin} from "../store/middlewares/admins";
 import {getHeaders} from "../utils/utils";
+import {createAdmin} from "../store/apiFunctions/adminMiddleware";
 
 
 const DialogNewAdmin = () => {
     const [t,] = useTranslation('translation');
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
     const [open, setOpen] = React.useState(false);
     const handleClickOpen = () => {
@@ -48,7 +49,11 @@ const DialogNewAdmin = () => {
             dataRequest.password = sha256(data.get("passwordFirst") as string)
         }
         if (!isError) {
-            dispatcher(createAdmin({data: dataRequest, headers: getHeaders(at as string)}))
+            dispatcher(createAdmin({
+                data: {data: dataRequest, headers: getHeaders(at as string)},
+                accessToken: at as string,
+                refreshToken: rt as string
+            }))
             handleClose()
 
         }
