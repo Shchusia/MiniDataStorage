@@ -5,7 +5,7 @@ interface PartApi {
 }
 
 interface ApiData {
-    method: "post" | "get" | "put" | "path" | "delete"
+    method: "post" | "get" | "put" | "patch" | "delete"
     api: string
 }
 
@@ -16,7 +16,8 @@ interface Api {
 const parts: PartApi = {
     auth: '/auth',
     project: '/project',
-    token: '/token'
+    token: '/token',
+    admin: '/admin'
 }
 
 export const apiRouts: Api = {
@@ -64,4 +65,29 @@ export const apiRouts: Api = {
         api: config.api.baseHost + config.api.baseRout + parts.token + '/',
 
     },
+    // admins
+    createAdmin: {
+        method: "post",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    },
+     getAdmins: {
+        method: "get",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    },
+    deleteAdmin: {
+        method: "delete",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    },
+    restoreAdmin: {
+        method: "patch",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    },
+    editAdmins: {
+        method: "put",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    },
+    editSettingsAdmin: {
+        method: "put",
+        api:  config.api.baseHost + config.api.baseRout + parts.admin + '/',
+    }
 }

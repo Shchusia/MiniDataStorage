@@ -16,6 +16,12 @@ export interface BaseRequest {
     optional?: { [key: string]: any }
 }
 
+export interface MainDataRequest {
+    data: BaseRequest,
+    accessToken: string,
+    refreshToken: string
+}
+
 export interface BadRequest {
     status: string,
     data: {
@@ -68,6 +74,19 @@ export interface FullProject {
 }
 
 export interface TinyProjects {
-    [key: number]:  TinyProject
+    [key: number]: TinyProject
+}
+
+export interface AdminData {
+    adminId: number,
+    adminName: string,
+    adminEmail: string,
+    isDeleted: boolean
+}
+
+export interface EditCreateAdminData {
+    email: string,
+    password?: string,
+    name: string
 }
 

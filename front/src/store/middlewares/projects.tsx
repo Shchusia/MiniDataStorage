@@ -5,7 +5,7 @@ import {apiRouts} from "../../configs/apis";
 import {StatusExecutionRequest} from "../../types/typesSystem";
 import {BadRequest, BaseRequest, FullProject, ResponseProject, TinyProject} from "../../types/apiTypes";
 
-const convertFullProject2TinyProject = (project: FullProject): TinyProject => (
+export const convertFullProject2TinyProject = (project: FullProject): TinyProject => (
     {
         projectId: project.projectId,
         projectTitle: project.projectTitle,
@@ -13,7 +13,7 @@ const convertFullProject2TinyProject = (project: FullProject): TinyProject => (
         isDeleted: project.isDeleted
     })
 
-export const projects = createAsyncThunk(actionTypes.projects, async (
+const projects = createAsyncThunk(actionTypes.projects, async (
     data: BaseRequest
 ) => {
     if (config.global.isDebug) {

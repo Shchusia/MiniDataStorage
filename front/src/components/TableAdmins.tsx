@@ -1,9 +1,8 @@
 import React from 'react'
-import {Token} from "../types/apiTypes";
+import {AdminData} from "../types/apiTypes";
 import {useTranslation} from "react-i18next";
 import Typography from '@mui/material/Typography';
 import {
-    IconButton,
     Paper,
     Table,
     TableBody,
@@ -16,26 +15,22 @@ import {
 import TableCell from "@mui/material/TableCell";
 import {StyledTableCell, StyledTableRow, TablePaginationActions} from "./TableProjects";
 import Button from "@mui/material/Button";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import copy from "clipboard-copy";
 import {useDispatch, useSelector} from "react-redux";
-import {getHeaders} from "../utils/utils";
 import {getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
-import {deleteToken} from "../store/apiFunctions/tokenMiddleware";
+import {getHeaders} from "../utils/utils";
+import {deleteAdmin, restoreAdmin} from "../store/apiFunctions/adminMiddleware";
 
-export interface TableTokensProps {
-    tokens: Token[]
-    isWriteTokens?: boolean
-    projectId: number
+export interface TableadminsProps {
+    admins: AdminData[]
 }
 
-const TableTokens = (props: TableTokensProps) => {
+const TableAdmins = (props: TableadminsProps) => {
     const [t,] = useTranslation('translation');
     const [page, setPage] = React.useState(0);
 
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - props.tokens.length) : 0;
+        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - props.admins.length) : 0;
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
     const rt = useSelector(getRefreshToken)
@@ -54,67 +49,73 @@ const TableTokens = (props: TableTokensProps) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-    const clickDeleteToken = (tokenId: number) => {
-        dispatcher(deleteToken({
+    const clickDeleteRestoreAdmin = (adminId: number, isDeleted: boolean) => {
+        if (isDeleted) {
+            dispatcher(restoreAdmin({
                 data: {
-                    optional: {
-                        tokenId: tokenId,
-                        projectId: props.projectId
-                    },
+                    optional: {adminId: adminId},
                     headers: getHeaders(at as string)
                 },
                 accessToken: at as string,
-                refreshToken: rt as string,
-            }
-        ))
+                refreshToken: at as string,
+            }))
+        } else {
+            dispatcher(deleteAdmin({
+                data: {
+                    optional: {adminId: adminId},
+                    headers: getHeaders(at as string)
+                }, accessToken: at as string,
+                refreshToken: at as string,
+            }))
+        }
+        // dispatcher(deleteToken({
+        //     optional: {
+        //         tokenId: tokenId,
+        //         projectId: props.projectId
+        //     },
+        //     headers: getHeaders(at as string)
+        // }))
 
     }
 
-
-    if (props.tokens.length === 0) {
-        return <Typography component={"span"} variant={"body2"}>
-            {t("No tokens of this type")}
+    if (props.admins.length === 0) {
+        return <Typography variant="h5" gutterBottom component="div">
+            {t("Empty list admins")}
         </Typography>
     }
+
+
     return (<React.Fragment>
             <TableContainer component={Paper}>
                 <Table sx={{minWidth: 500}} aria-label="custom pagination table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell align="left">{t("Token")}</StyledTableCell>
-                            <StyledTableCell align="right">{t("Expired")}</StyledTableCell>
+                            <StyledTableCell align="left">{t("Admin Name")}</StyledTableCell>
+                            <StyledTableCell align="right">{t("Email")}</StyledTableCell>
                             <StyledTableCell align="right">{t("Actions")}</StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {(rowsPerPage > 0
-                                ? props.tokens.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : props.tokens
+                                ? props.admins.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                : props.admins
                         ).map((row, index) => (
-                            <StyledTableRow key={`${row.accessTokenId}_${index}`}>
+                            <StyledTableRow key={`${row.adminId}_${index}`}>
                                 <TableCell component="th" scope="row">
-                                    {row.accessToken}
-                                    <IconButton
-                                        color="primary"
-                                        aria-label="Copy token"
-                                        component="label"
-                                        onClick={() => {
-                                            copy(row.accessToken)
-                                        }}
-                                    >
-                                        <ContentCopyIcon/>
-                                    </IconButton>
+                                    {row.adminName}
+
                                 </TableCell>
                                 <TableCell align="right">
-                                    {row.expired ? row.expired.toString() : "---"}
+                                    {row.adminEmail}
                                 </TableCell>
                                 <TableCell align="right">
                                     <Button
-                                        color="error"
+                                        variant="contained"
+                                        color={row.isDeleted ? "warning" : "error"}
                                         onClick={() => {
-                                            clickDeleteToken(row.accessTokenId)
+                                            clickDeleteRestoreAdmin(row.adminId, row.isDeleted)
                                         }}>
-                                        {t("Delete")}
+                                        {row.isDeleted ? t("Restore") : t("Delete")}
                                     </Button>
                                 </TableCell>
 
@@ -126,13 +127,13 @@ const TableTokens = (props: TableTokensProps) => {
                             </TableRow>
                         )}
                     </TableBody>
-                    {props.tokens.length > 5 ? (
+                    {props.admins.length > 5 ? (
                         <TableFooter>
                             <TableRow>
                                 <TablePagination
                                     rowsPerPageOptions={[5, 10, 25, {label: t('All'), value: -1}]}
                                     colSpan={4}
-                                    count={props.tokens.length}
+                                    count={props.admins.length}
                                     rowsPerPage={rowsPerPage}
                                     page={page}
                                     SelectProps={{
@@ -153,4 +154,4 @@ const TableTokens = (props: TableTokensProps) => {
     )
 }
 
-export default TableTokens;
+export default TableAdmins;

@@ -6,7 +6,9 @@ from app.core.auth import authenticate_admin
 from app.core.exc import RequestException
 from app.core.validators import validate_user_email
 from app.db import get_db
+from app.db.crud.crud_admin import convert_db_admin_to_model
 from app.models import AdminAuth
+from app.models.admin import AdminModel
 from app.models.general_response import (
     ErrorModel,
     RespModel,
@@ -23,7 +25,7 @@ router = APIRouter()
     description="method for user authorization ",
     response_description="does not return anything but puts an"
     " access token and a refresh token in the cookie",
-    response_model=RespModel[SuccessExecutionWithoutResponseData],
+    response_model=RespModel[AdminModel],
 )
 def login_route(
     user_data: AdminAuth = Body(),
@@ -45,11 +47,19 @@ def login_route(
                 code=403, title="Bad Request", detail="Incorrect email or password"
             )
         )
+    if user_db.is_deleted:
+        raise RequestException(
+            ErrorModel(
+                code=403,
+                title="Access Denied",
+                detail="Your account has been blocked. " "Contact the administrator",
+            )
+        )
     access_token = authorize.create_access_token(subject=user_db.admin_id)
     refresh_token = authorize.create_refresh_token(subject=user_db.admin_id)
 
     response = get_response(
-        data=SuccessExecutionWithoutResponseData(msg="Successfully login"),
+        data=convert_db_admin_to_model(user_db),
         headers={"AT": access_token, "RT": refresh_token},
     )
     # authorize.set_access_cookies(access_token, response=response)
@@ -91,5 +101,5 @@ def logout_route(authorize: AuthJWT = Depends()):
         data=SuccessExecutionWithoutResponseData(msg="Successfully logout")
     )
     # authorize.unset_jwt_cookies(response)
-
+    #
     return response

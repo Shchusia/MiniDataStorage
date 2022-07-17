@@ -6,7 +6,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.db.models import AdminDB
-from app.models.admin import AdminModel
+from app.models.admin import AdminCreateEdit, AdminModel
 
 # https://docs.sqlalchemy.org/en/14/tutorial/data_select.html
 
@@ -32,19 +32,23 @@ def convert_db_admin_to_model(db_admin: AdminDB) -> AdminModel:
 
 def get_list_admins_db(db: Session, admin_id_to_ignore: int) -> List[AdminModel]:
     admins = (
-        db.query(AdminDB).filter(AdminDB.admin_id != admin_id_to_ignore).all()
+        db.query(AdminDB)
+        .filter(AdminDB.admin_id != admin_id_to_ignore)
+        .order_by(AdminDB.is_deleted.asc(), AdminDB.admin_id.desc())
+        .all()
     )  # type: List[AdminDB]
     return [convert_db_admin_to_model(admin) for admin in admins]
 
 
-def get_admin_by_id(db: Session, admin_id: int) -> AdminDB:
+def get_admin_by_id_db(db: Session, admin_id: int) -> AdminDB:
     return db.query(AdminDB).filter(AdminDB.admin_id == admin_id).first()
 
 
 def create_admin_db(
-    db: Session, admin_email: str, admin_name: str, admin_password: str
+    db: Session,
+    admin: AdminCreateEdit,
 ) -> AdminModel:
-    admin = AdminDB(admin_email, admin_password, admin_name)
+    admin = AdminDB(email=admin.email, password=admin.password, name=admin.name)
     db.add(admin)
     db.commit()
     return convert_db_admin_to_model(admin)

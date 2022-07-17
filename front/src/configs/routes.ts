@@ -6,6 +6,6 @@ export const routes = {
     projects: "/projects",
     newProject: "/newProject",
     project: "/project",
-
-
+    settings: "/settings",
+    admins: "/admins"
 }

@@ -29,7 +29,7 @@ class AdminDB(Base):
         password: str,
         name: str = "admin",
     ):
-        email = validate_user_email(email)
+        email = validate_user_email(email.lower())
         if not email:
             raise ValueError("Invalid email address")
         self.admin_email = email
