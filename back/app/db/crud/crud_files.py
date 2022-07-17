@@ -113,7 +113,8 @@ def get_file_by_file_type_id(
     if not files_concrete_file_type:
         return None
     dict_files = {file.version: file for file in files_concrete_file_type}
-
+    if not dict_files:
+        return None
     max_version = max([version.parse(ver) for ver in dict_files.keys()])
     return dict_files[str(max_version)]
 

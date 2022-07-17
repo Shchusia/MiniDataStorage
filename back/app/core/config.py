@@ -85,8 +85,8 @@ class AuthConfig(BaseSettings):
         str(uuid4()), description="secret_key for build tokens"
     )
     # Configure application to store and get JWT from cookies
-    authjwt_token_location: set = Field({"cookies", "headers"}, description="")
-    # authjwt_token_location: set = Field({"headers"}, description="")
+    # authjwt_token_location: set = Field({"cookies", "headers"}, description="")
+    authjwt_token_location: set = Field({"headers"}, description="")
     # Disable CSRF Protection for this example. default is True
     # authjwt_cookie_csrf_protect: bool = True
     # authjwt_cookie_samesite: str = 'none'
