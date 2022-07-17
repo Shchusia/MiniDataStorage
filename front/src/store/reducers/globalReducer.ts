@@ -11,9 +11,17 @@ import {RootState} from "../index";
 import {StatusExecutionRequest, TypeAlert} from "../../types/typesSystem";
 import {login, logout, refresh} from "../middlewares/auth";
 import {AdminData, FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
-import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
+// import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
 import {createToken, deleteToken} from "../middlewares/tokens";
 import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../middlewares/admins";
+import {
+    createProject,
+    deleteProject,
+    editProject,
+    getProject,
+    projects,
+    restoreProject
+} from "../apiFunctions/projectMiddleware";
 
 
 const initialState: (ReducerAuth
@@ -150,12 +158,13 @@ export const globalSlice = createSlice({
             .addCase(projects.fulfilled, (state, action) => {
                 state.state = StatusExecutionRequest.SUCCESS
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
-                    state.projects = convertListTinyProjects(action.payload.projects)
+                    //@ts-ignore
+                    state.projects = convertListTinyProjects(action.payload.responseData.projects)
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -183,18 +192,18 @@ export const globalSlice = createSlice({
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
                     //@ts-ignore
-                    tmpDetails[action.payload.project.projectId] = action.payload.project
+                    tmpDetails[action.payload.responseData.project.projectId] = action.payload.responseData.project
                     state.detailProject = tmpDetails
                     const tmpProjects = {...state.projects}
                     //@ts-ignore
-                    tmpProjects[action.payload.tinyProject.projectId] = action.payload.tinyProject
+                    tmpProjects[action.payload.responseData.tinyProject.projectId] = action.payload.responseData.tinyProject
                     state.projects = tmpProjects
 
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -209,15 +218,15 @@ export const globalSlice = createSlice({
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
                     const tmpProjects = {...state.projects}
-                    if (action.payload.project === null) {
-
-                        tmpDetails[action.payload.projectId] = null
+                    //@ts-ignore
+                    if (action.payload.responseData.project === null) {
+                        //@ts-ignore
+                        tmpDetails[action.payload.responseData.projectId] = null
                     } else {
                         //@ts-ignore
-                        tmpDetails[action.payload.project.projectId] = action.payload.project
+                        tmpDetails[action.payload.responseData.project.projectId] = action.payload.responseData.project
                         //@ts-ignore
-                        tmpProjects[action.payload.tinyProject.projectId] = action.payload.tinyProject
-
+                        tmpProjects[action.payload.responseData.tinyProject.projectId] = action.payload.responseData.tinyProject
                     }
                     state.detailProject = tmpDetails
                     state.projects = tmpProjects
@@ -225,8 +234,8 @@ export const globalSlice = createSlice({
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -242,9 +251,9 @@ export const globalSlice = createSlice({
                     const tmpDetails = {...state.detailProject}
                     const tmpProjects = {...state.projects}
                     //@ts-ignore
-                    tmpDetails[action.payload.project.projectId] = action.payload.project
+                    tmpDetails[action.payload.responseData.project.projectId] = action.payload.responseData.project
                     //@ts-ignore
-                    tmpProjects[action.payload.tinyProject.projectId] = action.payload.tinyProject
+                    tmpProjects[action.payload.responseData.tinyProject.projectId] = action.payload.responseData.tinyProject
 
                     state.detailProject = tmpDetails
                     state.projects = tmpProjects
@@ -252,8 +261,8 @@ export const globalSlice = createSlice({
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -268,14 +277,17 @@ export const globalSlice = createSlice({
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
                     const tmpProjects = {...state.projects}
-                    if (action.payload.project === null) {
+                    //@ts-ignore
 
-                        tmpDetails[action.payload.projectId] = null
+                    if (action.payload.responseData.project === null) {
+                        //@ts-ignore
+
+                        tmpDetails[action.payload.responseData.projectId] = null
                     } else {
                         //@ts-ignore
-                        tmpDetails[action.payload.project.projectId] = action.payload.project
+                        tmpDetails[action.payload.responseData.project.projectId] = action.payload.responseData.project
                         //@ts-ignore
-                        tmpProjects[action.payload.tinyProject.projectId] = action.payload.tinyProject
+                        tmpProjects[action.payload.responseData.tinyProject.projectId] = action.payload.responseData.tinyProject
 
                     }
                     state.detailProject = tmpDetails
@@ -284,8 +296,8 @@ export const globalSlice = createSlice({
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -300,14 +312,17 @@ export const globalSlice = createSlice({
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
                     const tmpProjects = {...state.projects}
-                    if (action.payload.project === null) {
+                    //@ts-ignore
 
-                        tmpDetails[action.payload.projectId] = null
+                    if (action.payload.responseData.project === null) {
+                        //@ts-ignore
+
+                        tmpDetails[action.payload.responseData.projectId] = null
                     } else {
                         //@ts-ignore
-                        tmpDetails[action.payload.project.projectId] = action.payload.project
+                        tmpDetails[action.payload.responseData.project.projectId] = action.payload.responseData.project
                         //@ts-ignore
-                        tmpProjects[action.payload.tinyProject.projectId] = action.payload.tinyProject
+                        tmpProjects[action.payload.responseData.tinyProject.projectId] = action.payload.responseData.tinyProject
 
                     }
                     state.detailProject = tmpDetails
@@ -316,8 +331,8 @@ export const globalSlice = createSlice({
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -439,7 +454,7 @@ export const globalSlice = createSlice({
                     const tmpAdmins = [...state.admins]
 
                     // @ts-ignore
-                    const adminToChange = searchId(tmpAdmins,action.payload.admin.adminId)
+                    const adminToChange = searchId(tmpAdmins, action.payload.admin.adminId)
                     console.log(adminToChange)
                     // @ts-ignore
                     tmpAdmins[adminToChange] = action.payload.admin
@@ -463,7 +478,7 @@ export const globalSlice = createSlice({
                     const tmpAdmins = [...state.admins]
 
                     // @ts-ignore
-                    const adminToChange = searchId(tmpAdmins,action.payload.admin.adminId)
+                    const adminToChange = searchId(tmpAdmins, action.payload.admin.adminId)
                     console.log(adminToChange)
                     // @ts-ignore
                     tmpAdmins[adminToChange] = action.payload.admin
@@ -485,10 +500,10 @@ export const globalSlice = createSlice({
     }
 })
 
-const searchId = (listAdmins: AdminData[], adminIdToSearch: number ): number  => {
+const searchId = (listAdmins: AdminData[], adminIdToSearch: number): number => {
     for (let index = 0; index < listAdmins.length; index++) {
         if (listAdmins[index].adminId === adminIdToSearch) {
-            return  index
+            return index
         }
     }
     return -1

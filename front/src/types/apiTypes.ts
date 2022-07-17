@@ -16,6 +16,12 @@ export interface BaseRequest {
     optional?: { [key: string]: any }
 }
 
+export interface MainDataRequest {
+    data: BaseRequest,
+    accessToken: string,
+    refreshToken: string
+}
+
 export interface BadRequest {
     status: string,
     data: {

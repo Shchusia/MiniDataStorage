@@ -4,14 +4,7 @@ import Typography from "@mui/material/Typography";
 import {useTranslation} from "react-i18next";
 import Tokens from "../../../components/Tokens";
 import {useDispatch, useSelector} from "react-redux";
-import {addAlert, getAccessToken, getFullProject} from "../../../store/reducers/globalReducer";
-import {
-    createProject,
-    deleteProject,
-    editProject,
-    getProject,
-    restoreProject
-} from "../../../store/middlewares/projects";
+import {addAlert, getAccessToken, getFullProject, getRefreshToken} from "../../../store/reducers/globalReducer";
 import {getHeaders} from "../../../utils/utils";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from '@mui/material/Container';
@@ -20,6 +13,7 @@ import TextFieldCustom from "../../../components/fields/TextField";
 import EmailField, {emailRegexCompiled} from "../../../components/fields/EmailField";
 import Button from "@mui/material/Button";
 import {TypeAlert} from "../../../types/typesSystem";
+import {deleteProject, editProject, getProject, restoreProject} from "../../../store/apiFunctions/projectMiddleware";
 
 
 const Project = () => {
@@ -28,6 +22,8 @@ const Project = () => {
     const project = useSelector(getFullProject(Number(id)))
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -49,31 +45,54 @@ const Project = () => {
 
             // send request
             dispatcher(
-                editProject(
-                    {data: dataRequest,
+                editProject({
+                    data: {
+                        data: dataRequest,
                         headers: getHeaders(at as string),
-                        optional:{projectId: id}})
+                        optional: {projectId: id}
+                    },
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                })
             )
         }
     }
     const clickDeleteRestore = () => {
-        if(project) {
+        if (project) {
             if (project.isDeleted) {
-                dispatcher(restoreProject({headers: getHeaders(at as string), optional: {projectId: project.projectId}}))
+                dispatcher(restoreProject({
+                        data: {
+                            headers: getHeaders(at as string),
+                            optional: {projectId: project.projectId}
+                        },
+                        accessToken: at as string,
+                        refreshToken: rt as string
+                    }
+                ))
             } else {
                 dispatcher(deleteProject({
-                    headers: getHeaders(at as string),
-                    optional: {projectId: project.projectId}
-                }))
+                        data: {
+                            headers: getHeaders(at as string),
+                            optional: {projectId: project.projectId}
+                        },
+                        accessToken: at as string,
+                        refreshToken: rt as string
+                    }
+                ))
             }
         }
     }
 
     React.useEffect(() => {
-        if (project === undefined) {
-            dispatcher(getProject({data: {projectId: id}, headers: getHeaders(at as string)}))
-        }
-    }, [])
+            if (project === undefined) {
+                dispatcher(getProject({
+                    data: {data: {projectId: id}, headers: getHeaders(at as string)},
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                }))
+            }
+        },
+        [])
     console.log(project)
 
     return <React.Fragment>
@@ -102,12 +121,17 @@ const Project = () => {
                         // onSubmit{(event) =>{}}
                         //  noValidate
                          sx={{mt: 1, width: 1}}>
-                        <TextFieldCustom id={"managerName"} label={"Manager Name"} required fullWidth value={project?.projectManager}/>
+                        <TextFieldCustom id={"managerName"} label={"Manager Name"} required fullWidth
+                                         value={project?.projectManager}/>
                         <EmailField defaultEmail={project?.projectManagerEmail}/>
-                        <TextFieldCustom id={"titleProject"} label={"Title Project"} required fullWidth value={project?.projectTitle}/>
-                        <TextFieldCustom id={"descriptionProject"} label={"Description Project"} isMultiline rows={4} value={project?.projectDescription}
+                        <TextFieldCustom id={"titleProject"} label={"Title Project"} required fullWidth
+                                         value={project?.projectTitle}/>
+                        <TextFieldCustom id={"descriptionProject"} label={"Description Project"} isMultiline
+                                         rows={4}
+                                         value={project?.projectDescription}
                                          required fullWidth/>
-                        <TextFieldCustom id={"created"} label={"Created"} isDisabled fullWidth value={project?.created.toString()}/>
+                        <TextFieldCustom id={"created"} label={"Created"} isDisabled fullWidth
+                                         value={project?.created.toString()}/>
                         <Button
                             fullWidth
                             variant="contained"
@@ -115,7 +139,7 @@ const Project = () => {
                             onClick={clickDeleteRestore}
                             color={project?.isDeleted ? "warning" : "error"}
                         >
-                            {project?.isDeleted === true ? t("Restore"): t("Delete")}
+                            {project?.isDeleted === true ? t("Restore") : t("Delete")}
                         </Button>
                         <Button
                             type="submit"

@@ -1,7 +1,6 @@
 import React from 'react'
 import {useDispatch, useSelector} from "react-redux";
-import {projects} from "../../../store/middlewares/projects";
-import {getAccessToken, getProjects} from "../../../store/reducers/globalReducer";
+import {getAccessToken, getRefreshToken} from "../../../store/reducers/globalReducer";
 import Typography from "@mui/material/Typography";
 import {useTranslation} from "react-i18next";
 import Button from "@mui/material/Button";
@@ -10,6 +9,8 @@ import {useNavigate} from "react-router";
 import {routes} from "../../../configs/routes";
 import {getHeaders} from "../../../utils/utils";
 import TableProjects from "../../../components/TableProjects";
+import {BaseRequest} from "../../../types/apiTypes";
+import {projects} from "../../../store/apiFunctions/projectMiddleware";
 
 const Projects = () => {
     const dispatcher: Function = useDispatch();
@@ -18,12 +19,17 @@ const Projects = () => {
     const [t,] = useTranslation('translation');
     // const listProjects = useSelector(getProjects)
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
     React.useEffect(() => {
-        // if (Object.keys(listProjects).length === 0) {
-            dispatcher(projects(
-                {headers: getHeaders(at as string)}
-            ))
-        // }
+
+        dispatcher(projects(
+            {
+                data: {headers: getHeaders(at as string)},
+                accessToken: at as string,
+                refreshToken: rt as string
+            }
+    ))
+
     }, [])
 
 
