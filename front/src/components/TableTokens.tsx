@@ -19,9 +19,9 @@ import Button from "@mui/material/Button";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import copy from "clipboard-copy";
 import {useDispatch, useSelector} from "react-redux";
-import {deleteToken} from "../store/middlewares/tokens";
 import {getHeaders} from "../utils/utils";
-import {getAccessToken} from "../store/reducers/globalReducer";
+import {getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
+import {deleteToken} from "../store/apiFunctions/tokenMiddleware";
 
 export interface TableTokensProps {
     tokens: Token[]
@@ -38,6 +38,7 @@ const TableTokens = (props: TableTokensProps) => {
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - props.tokens.length) : 0;
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
 
     const handleChangePage = (
@@ -55,12 +56,17 @@ const TableTokens = (props: TableTokensProps) => {
     };
     const clickDeleteToken = (tokenId: number) => {
         dispatcher(deleteToken({
-            optional: {
-                tokenId: tokenId,
-                projectId: props.projectId
-            },
-            headers: getHeaders(at as string)
-        }))
+                data: {
+                    optional: {
+                        tokenId: tokenId,
+                        projectId: props.projectId
+                    },
+                    headers: getHeaders(at as string)
+                },
+                accessToken: at as string,
+                refreshToken: rt as string,
+            }
+        ))
 
     }
 
@@ -120,27 +126,27 @@ const TableTokens = (props: TableTokensProps) => {
                             </TableRow>
                         )}
                     </TableBody>
-                    { props.tokens.length > 5 ? (
-                    <TableFooter>
-                        <TableRow>
-                            <TablePagination
-                                rowsPerPageOptions={[5, 10, 25, {label: t('All'), value: -1}]}
-                                colSpan={4}
-                                count={props.tokens.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                SelectProps={{
-                                    inputProps: {
-                                        'aria-label': t('rows per page'),
-                                    },
-                                    native: true,
-                                }}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                                ActionsComponent={TablePaginationActions}
-                            />
-                        </TableRow>
-                    </TableFooter>) : (<></>)}
+                    {props.tokens.length > 5 ? (
+                        <TableFooter>
+                            <TableRow>
+                                <TablePagination
+                                    rowsPerPageOptions={[5, 10, 25, {label: t('All'), value: -1}]}
+                                    colSpan={4}
+                                    count={props.tokens.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    SelectProps={{
+                                        inputProps: {
+                                            'aria-label': t('rows per page'),
+                                        },
+                                        native: true,
+                                    }}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                    ActionsComponent={TablePaginationActions}
+                                />
+                            </TableRow>
+                        </TableFooter>) : (<></>)}
                 </Table>
             </TableContainer>
         </React.Fragment>

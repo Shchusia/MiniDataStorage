@@ -5,12 +5,12 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import {useTranslation} from "react-i18next";
 import {useDispatch, useSelector} from "react-redux";
-import {getAccessToken, getFullProject} from "../store/reducers/globalReducer";
-import {getProject} from "../store/middlewares/projects";
+import {getAccessToken, getFullProject, getRefreshToken} from "../store/reducers/globalReducer";
 import {getHeaders} from "../utils/utils";
 import {Token} from "../types/apiTypes";
 import TableTokens from "./TableTokens";
 import DialogNewToken from "./DialogNewToken";
+import {getProject} from "../store/apiFunctions/projectMiddleware";
 
 export interface TokenProps {
     projectId: number
@@ -76,11 +76,17 @@ const Tokens = (props: TokenProps) => {
     const project = useSelector(getFullProject(props.projectId))
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
 
     React.useEffect(() => {
         if (project === undefined) {
-            dispatcher(getProject({data: {projectId: props.projectId}, headers: getHeaders(at as string)}))
+            dispatcher(getProject({
+                    data: {data: {projectId: props.projectId},
+                        headers: getHeaders(at as string)},
+                    accessToken: at as string,
+                    refreshToken: rt as string
+                }))
         }
     }, [])
     const [readTokens, writeTokens] = splitTokensByType(project?.tokens)

@@ -12,7 +12,7 @@ import {StatusExecutionRequest, TypeAlert} from "../../types/typesSystem";
 import {login, logout, refresh} from "../middlewares/auth";
 import {AdminData, FullProject, TinyProject, TinyProjects} from "../../types/apiTypes";
 // import {createProject, deleteProject, editProject, getProject, projects, restoreProject} from "../middlewares/projects";
-import {createToken, deleteToken} from "../middlewares/tokens";
+// import {createToken, deleteToken} from "../middlewares/tokens";
 import {createAdmin, deleteAdmin, editSelfAdmin, getListAdmins, restoreAdmin} from "../middlewares/admins";
 import {
     createProject,
@@ -22,6 +22,7 @@ import {
     projects,
     restoreProject
 } from "../apiFunctions/projectMiddleware";
+import {createToken, deleteToken} from "../apiFunctions/tokenMiddleware";
 
 
 const initialState: (ReducerAuth
@@ -216,6 +217,7 @@ export const globalSlice = createSlice({
             .addCase(getProject.fulfilled, (state, action) => {
                 state.state = StatusExecutionRequest.SUCCESS
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
+                    console.log(action.payload)
                     const tmpDetails = {...state.detailProject}
                     const tmpProjects = {...state.projects}
                     //@ts-ignore
@@ -346,17 +348,21 @@ export const globalSlice = createSlice({
                 state.state = StatusExecutionRequest.SUCCESS
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
-                    const project = tmpDetails[action.payload.projectId]
+                    console.log(action.payload)
                     //@ts-ignore
-                    project.tokens.push(action.payload.token)
-                    tmpDetails[action.payload.projectId] = project
+                    const project = tmpDetails[action.payload.responseData.projectId]
+                    //@ts-ignore
+                    project.tokens.push(action.payload.responseData.token)
+                    //@ts-ignore
+
+                    tmpDetails[action.payload.responseData.projectId] = project
                     state.detailProject = tmpDetails
 
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]
@@ -370,22 +376,28 @@ export const globalSlice = createSlice({
                 state.state = StatusExecutionRequest.SUCCESS
                 if (action.payload.status === StatusExecutionRequest.SUCCESS) {
                     const tmpDetails = {...state.detailProject}
-                    const project = tmpDetails[action.payload.projectId]
+                    //@ts-ignore
+
+                    const project = tmpDetails[action.payload.responseData.projectId]
                     console.log(project)
                     //@ts-ignore
                     const newArrayTokens = project?.tokens.filter(function (el) {
-                        return el.accessTokenId !== action.payload.token_id
+                        //@ts-ignore
+
+                        return el.accessTokenId !== action.payload.responseData.token_id
                     });
                     //@ts-ignore
                     project.tokens = newArrayTokens
-                    tmpDetails[action.payload.projectId] = project
+                    //@ts-ignore
+
+                    tmpDetails[action.payload.responseData.projectId] = project
                     state.detailProject = tmpDetails
 
                 } else {
                     const alert = {
                         type: TypeAlert.ERROR,
-                        text: action.payload.detail,
-                        title: action.payload.title,
+                        text: action.payload?.error?.detail as string,
+                        title: action.payload?.error?.title as string,
                         ttl: 10
                     }
                     const tmpAlert = [...state.alerts]

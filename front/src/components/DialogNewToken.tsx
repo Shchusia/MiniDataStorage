@@ -6,9 +6,9 @@ import Dialog from '@mui/material/Dialog';
 import {Box, DialogActions, DialogContent, DialogTitle} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import {useDispatch, useSelector} from "react-redux";
-import {getAccessToken} from "../store/reducers/globalReducer";
-import {createToken} from "../store/middlewares/tokens";
+import {getAccessToken, getRefreshToken} from "../store/reducers/globalReducer";
 import {getHeaders} from "../utils/utils";
+import {createToken} from "../store/apiFunctions/tokenMiddleware";
 
 
 export interface PropsDialogNewToken {
@@ -20,6 +20,7 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
     const [t,] = useTranslation('translation');
     const dispatcher: Function = useDispatch();
     const at = useSelector(getAccessToken)
+    const rt = useSelector(getRefreshToken)
 
     const [open, setOpen] = React.useState(false);
     const handleClickOpen = () => {
@@ -37,8 +38,11 @@ const DialogNewToken = (props: PropsDialogNewToken) => {
             "expired": data.get("DatetimeExpired"),
             "isWrite": props?.isWrite ? true : false
         }
-        dispatcher(createToken({data: dataRequest,
-            headers: getHeaders(at as string)}))
+        dispatcher(createToken({data:{data: dataRequest,
+            headers: getHeaders(at as string)},
+            accessToken: at as string,
+            refreshToken: rt as string
+        }))
     }
 
     return <React.Fragment>

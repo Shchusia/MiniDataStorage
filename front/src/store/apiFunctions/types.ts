@@ -4,7 +4,7 @@ import {StatusExecutionRequest} from "../../types/typesSystem";
 export interface RequestBaseApi {
     data?: { [key: string]: any } | FormData | null
     headers?: { [key: string]: any }
-    optional?: { [key: string]: any }
+    dataoptional?: { [key: string]: any }
 
 }
 
